@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        A page of its own rather than a block inside the Settings app, and that
+        is not a preference. Odoo 16 builds the Settings page out of
+        <div class="app_settings_block"> inside <div class="settings">, and
+        Odoo 17 builds it out of <app>, <block> and <setting> placed directly
+        in the form. One module cannot inherit both, and a module that inherits
+        the wrong one does not install at all. This form is the same on both.
+
+        The priority is high on purpose: it must never become the default form
+        for res.config.settings, which is the page the Settings app opens.
+    -->
+    <record id="njiwa_res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">njiwa.res.config.settings.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <form string="Njiwa">
+                <header>
+                    <button name="action_njiwa_save" type="object" string="Save these settings"
+                            class="btn-primary"/>
+                    <button name="action_njiwa_test_connection" type="object"
+                            string="Test connection"/>
+                    <button name="action_njiwa_send_test_message" type="object"
+                            string="Send test message"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Njiwa</h1>
+                        <div class="text-muted">
+                            Njiwa sends the WhatsApp messages. Odoo tells it when.
+                        </div>
+                    </div>
+                    <div class="alert alert-info" role="status">
+                        What you type here is saved when you press <b>Save these settings</b>,
+                        and Odoo saves this form for you before it runs either of the buttons
+                        beside it, so <b>Test connection</b> and <b>Send test message</b> use
+                        what is on the screen.
+                    </div>
+
+                    <h2>Connection</h2>
+                    <group>
+                        <field name="njiwa_enabled"/>
+                        <field name="njiwa_api_key" widget="password"/>
+                        <field name="njiwa_base_url"/>
+                        <field name="njiwa_from_number" placeholder="254712345678"/>
+                    </group>
+                    <div class="text-muted mb-4">
+                        Start with a key beginning <code>sk_test_</code>. Everything works, every
+                        message is checked and stored, and nothing reaches a phone. When you are
+                        satisfied, paste the <code>sk_live_</code> key in its place: from then on
+                        the messages are real and they cost money. Leave the address alone unless
+                        you were given one of your own.
+                    </div>
+
+                    <h2>Check it works</h2>
+                    <group>
+                        <field name="njiwa_test_number" placeholder="254712345678"/>
+                    </group>
+                    <div class="text-muted mb-4">
+                        <b>Test connection</b> asks Njiwa which WhatsApp numbers this key really
+                        has and sends nothing. <b>Send test message</b> sends one fixed message to
+                        the number above, and only to that number: it never reaches a customer.
+                    </div>
+
+                    <h2>Messages to your customers</h2>
+                    <div class="text-muted">
+                        Each message is plain text. Anything in braces is filled in from the
+                        order, and a placeholder that does not exist is taken out before sending
+                        rather than shown to a customer. Every message below is off until you
+                        turn it on, and the wording works as it is. Clearing a box is how you
+                        stop one message without turning the event off.
+                    </div>
+                    <group>
+                        <field name="njiwa_placeholders" nolabel="1" colspan="2" readonly="1"/>
+                    </group>
+
+                    <group string="Order confirmed">
+                        <field name="njiwa_event_order_placed"/>
+                        <field name="njiwa_message_order_placed" nolabel="1" colspan="2"/>
+                    </group>
+                    <div class="text-muted mb-4">
+                        Sent when a quotation is confirmed and becomes a sales order.
+                    </div>
+
+                    <group string="Payment received">
+                        <field name="njiwa_event_payment_received"/>
+                        <field name="njiwa_message_payment_received" nolabel="1" colspan="2"/>
+                    </group>
+                    <div class="text-muted mb-4">
+                        Sent when a customer invoice is fully paid, at the moment the payment is
+                        matched against it. A part payment sends nothing, and an invoice settled
+                        by a credit note sends nothing either: nobody paid.
+                    </div>
+
+                    <group string="Shipped">
+                        <field name="njiwa_event_shipped"/>
+                        <field name="njiwa_message_shipped" nolabel="1" colspan="2"/>
+                    </group>
+                    <div class="text-muted mb-4">
+                        Sent when a delivery order is validated. Deliveries going out only, so a
+                        receipt from a supplier and an internal transfer message nobody.
+                    </div>
+
+                    <group string="Order cancelled">
+                        <field name="njiwa_event_order_cancelled"/>
+                        <field name="njiwa_message_order_cancelled" nolabel="1" colspan="2"/>
+                    </group>
+                    <div class="text-muted mb-4">
+                        Sent when a sales order is cancelled. A cancellation nobody explained is
+                        what turns into a phone call.
+                    </div>
+
+                    <group string="Refunded">
+                        <field name="njiwa_event_refunded"/>
+                        <field name="njiwa_message_refunded" nolabel="1" colspan="2"/>
+                    </group>
+                    <div class="text-muted mb-4">
+                        Sent when you post a credit note for a customer. It says the money is on
+                        its way rather than that it has arrived, because banks take a few days
+                        and the difference is a message you would otherwise have to answer.
+                    </div>
+
+                    <h2>The message to you</h2>
+                    <div class="text-muted">
+                        One message when an order becomes real, which is when it is confirmed.
+                        Not when a quotation is written, so an enquiry that goes nowhere never
+                        wakes you up. It is sent once per order, to every number you list.
+                    </div>
+                    <group>
+                        <field name="njiwa_event_new_order"/>
+                        <field name="njiwa_alert_numbers"
+                               placeholder="254712345678, 254733000111"/>
+                        <field name="njiwa_message_new_order" nolabel="1" colspan="2"/>
+                    </group>
+                    <div class="text-muted mb-4">
+                        <code>{admin_url}</code> is worth keeping in this one: it opens the order
+                        in Odoo straight from your phone.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="njiwa_settings_action" model="ir.actions.act_window">
+        <field name="name">Njiwa</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="njiwa_res_config_settings_view_form"/>
+        <field name="target">inline</field>
+        <field name="context">{'module': 'njiwa'}</field>
+    </record>
+
+    <menuitem id="njiwa_settings_menu"
+              name="Njiwa (WhatsApp)"
+              parent="sale.menu_sale_config"
+              action="njiwa_settings_action"
+              groups="base.group_system"
+              sequence="91"/>
+</odoo>

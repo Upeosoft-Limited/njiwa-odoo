@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        The whole of this module's delivery. A confirmed order writes a row and
+        returns; this comes along a minute later and sends it.
+
+        noupdate is set so that a shop which turns this off, slows it down or
+        gives it a different user keeps that decision through an upgrade.
+    -->
+    <data noupdate="1">
+        <record id="ir_cron_njiwa_drain" model="ir.cron">
+            <field name="name">Njiwa: send queued WhatsApp messages</field>
+            <field name="model_id" ref="model_njiwa_pending_send"/>
+            <field name="state">code</field>
+            <field name="code">model._drain()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <!-- Forever. Left at its default of 1 this would run once and
+                 switch itself off, and the shop would find out from a customer. -->
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+            <field name="user_id" ref="base.user_root"/>
+        </record>
+    </data>
+</odoo>
